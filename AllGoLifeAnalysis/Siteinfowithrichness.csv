@@ -1,0 +1,40 @@
+"","Site","Location","Host.clade","Habitat","Mean_annual_temperature","Mean_precipitation_driest_quarter","Mean_precipitation_wettest_quarter","Mean_annual_precipitation","Site.Host","RICHNESS","ln_richness"
+"1","Ajo","Arizona","Angiospermae","Sonoran Desert",21.9,2,37,18,"Ajo_Angiospermae",10,2.30258509299405
+"2","Aravaipa, East","Arizona","Lichen","Sonoran Desert",15.2,10,81,42,"Aravaipa, East_Lichen",20,2.99573227355399
+"3","Aravaipa, West","Arizona","Lichen","Sonoran Desert",19.5,5,57,31,"Aravaipa, West_Lichen",9,2.19722457733622
+"4","Casa Grande","Arizona","Angiospermae","Sonoran Desert",21.4,2,38,19,"Casa Grande_Angiospermae",16,2.77258872223978
+"5","Catalina","Arizona","Angiospermae","Sonoran Desert",17.6,8,73,37,"Catalina_Angiospermae",13,2.56494935746154
+"6","Chiricahua Mountains","Arizona","Coniferae","Pine/oak/juniper forest",11.7,10,118,46,"Chiricahua Mountains_Coniferae",16,2.77258872223978
+"7","Dorob","Southern_Africa","Angiospermae","",20.32083321,0,14,3.166666667,"Dorob_Angiospermae",5,1.6094379124341
+"8","Dragoon","Arizona","Angiospermae","Sonoran Desert",16.1,6,85,33,"Dragoon_Angiospermae",21,3.04452243772342
+"9","Ester's cabin","Chile","Angiospermae","Fog desert",15.78,0,13,1.583333333,"Ester's cabin_Angiospermae",5,1.6094379124341
+"10","Fort Bowie","Arizona","Gnetidae","Sonoran Desert",17,7,56,25,"Fort Bowie_Gnetidae",11,2.39789527279837
+"11","Gila Bend","Arizona","Angiospermae","Sonoran Desert",22.9,1,28,14,"Gila Bend_Angiospermae",7,1.94591014905531
+"12","Lake Havasu","Arizona","Angiospermae","Sonoran-Mojave Desert transition",22.9,1,20,12,"Lake Havasu_Angiospermae",13,2.56494935746154
+"13","Lo Prado","Chile","Angiospermae","Mediterranean scrub",14.3575,10,277,36.33333333,"Lo Prado_Angiospermae",15,2.70805020110221
+"14","Lomitas","Chile","Angiospermae","Desert",15.78,0,13,1.583333333,"Lomitas_Angiospermae",3,1.09861228866811
+"15","Mt. Lemmon","Arizona","Coniferae","Pine/oak/juniper forest",13.6,11,109,54,"Mt. Lemmon_Coniferae",20,2.99573227355399
+"16","Namaqua","Southern_Africa","Angiospermae","",17.82916641,5,26,14.41666667,"Namaqua_Angiospermae",10,2.30258509299405
+"17","Pan de Azucar","Chile","Angiospermae","Fog desert",15.78,0,13,1.583333333,"Pan de Azucar_Angiospermae",5,1.6094379124341
+"18","Phoenix","Arizona","Angiospermae","Sonoran Desert",22.1,2,31,19,"Phoenix_Angiospermae",10,2.30258509299405
+"19","Phoenix, west","Arizona","Angiospermae","Sonoran Desert",20.8,3,43,23,"Phoenix, west_Angiospermae",10,2.30258509299405
+"20","Picacho Peak","Arizona","Angiospermae","Sonoran Desert",21.1,4,45,22,"Picacho Peak_Angiospermae",23,3.13549421592915
+"21","Rock Springs","Arizona","Angiospermae","Sonoran Desert",20.3,5,49,32,"Rock Springs_Angiospermae",19,2.94443897916644
+"22","Sahuarita","Arizona","Gnetidae","Sonoran Desert",19.6,5,72,29,"Sahuarita_Gnetidae",8,2.07944154167984
+"23","Santa Rita Experimental Range","Arizona","Angiospermae","Grassland",18,5,109,40,"Santa Rita Experimental Range_Angiospermae",7,1.94591014905531
+"24","Sierra Prieta","Arizona","Angiospermae","Pine/oak/juniper forest",12.3,9,78,39,"Sierra Prieta_Angiospermae",9,2.19722457733622
+"25","Swartberg","Southern_Africa","Angiospermae","Minor disturbance, succulent shrubland",13.61250019,18,37,25,"Swartberg_Angiospermae",52,3.95124371858143
+"26","Tubac","Arizona","Angiospermae","Sonoran Desert",18.4,5,102,35,"Tubac_Angiospermae",7,1.94591014905531
+"27","Tucson","Arizona","Gnetidae","Sonoran Desert",18.4,5,102,35,"Tucson_Gnetidae",10,2.30258509299405
+"28","Tucson Mountains","Arizona","Gnetidae","Sonoran Desert",20.2,5,62,28,"Tucson Mountains_Gnetidae",73,4.29045944114839
+"29","Tucson Mountains (Saguaro)","Arizona","Angiospermae","Sonoran Desert",20.4,5,56,25,"Tucson Mountains (Saguaro)_Angiospermae",82,4.40671924726425
+"30","Tucson Mountains foothills","Arizona","Angiospermae","Sonoran Desert",20.2,5,62,28,"Tucson Mountains foothills_Angiospermae",11,2.39789527279837
+"31","Tucson, central","Arizona","Angiospermae","Sonoran Desert",20.9,5,57,26,"Tucson, central_Angiospermae",3,1.09861228866811
+"32","Tucson, First/River/CAC","Arizona","Angiospermae","Sonoran Desert",20.6,5,56,26,"Tucson, First/River/CAC_Angiospermae",34,3.52636052461616
+"33","Tucson, Grant/Santa Cruz","Arizona","Angiospermae","Sonoran Desert",20.6,5,56,26,"Tucson, Grant/Santa Cruz_Angiospermae",22,3.09104245335832
+"34","Tucson, Swan/Rillito","Arizona","Angiospermae","Sonoran Desert",20.4,5,59,28,"Tucson, Swan/Rillito_Angiospermae",29,3.36729582998647
+"35","Vail","Arizona","Angiospermae","Sonoran Desert",18.4,5,94,36,"Vail_Angiospermae",23,3.13549421592915
+"36","Waterberg","Southern_Africa","Angiospermae","Primary forest with large Ficus at the base of Waterberg Plateau",19.36666679,0,112,37.41666667,"Waterberg_Angiospermae",20,2.99573227355399
+"37","Welwitschia","Southern_Africa","Angiospermae","Shale ridges and arroyo with Fabaceae",20.8125,0,16,3.916666667,"Welwitschia_Angiospermae",4,1.38629436111989
+"38","West_Coast","Southern_Africa","Angiospermae","Rich Langebaan dune strandveld community above dunes. Euphorbiaceae, Crassulaceae, mistletoes; many epiphytic lichens",16.11666679,7,59,27.66666667,"West_Coast_Angiospermae",36,3.58351893845611
+"39","Willcox","Arizona","Angiospermae","Sonoran Desert",16.1,6,68,28,"Willcox_Angiospermae",13,2.56494935746154
