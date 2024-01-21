@@ -1,0 +1,29 @@
+---
+title: "Chapter One masters thesis"
+author: "Mariam Marand"
+date: "2024-01-19"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Chapter One Thesis
+
+This document outlines the metagenomic studies utilized in chapter one of my thesis to analyze microfungi population in biological soil crust samples at the SRER
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
