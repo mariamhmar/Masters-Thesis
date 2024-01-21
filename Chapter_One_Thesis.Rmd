@@ -15,15 +15,71 @@ This document outlines the metagenomic studies utilized in chapter one of my the
 
 
 ```{r cars}
-summary(cars)
+library(tidyverse)
+library(vegan)
+library(indicspecies)
+library(devtools)
+library(lme4)
+library(patchwork)
+library(lmerTest)
+library(tibble)
+##Import OTU counts table and Metadata
+FullSRERDataset<-read.csv("Chapter2/FinalSRERdataOTUsandMetaData-ForAnalysis-27June2023.csv", header=TRUE, fileEncoding="UTF-8-BOM")
+##Remove samples where richness=0 
+filtered_FullData <- subset(FullSRERDataset, Richness != 0)
+##Seperate data to generate an OTU table for distance matrix
+##MetaDataTable
+MetaSRER<-filtered_FullData[,1:12]
+MetaSRER <- filtered_FullData[, 1:12]
+rownames(MetaSRER) <- MetaSRER$Sample
+#MetaSRER <- MetaSRER[, -which(names(MetaSRER) == "Sample")]
+
+#MetaSRER <- as.data.frame(MetaSRER)
+#MetaSRER <- MetaSRER %>%
+  #column_to_rownames(var = "Sample")
+#MetaSRER <- MetaSRER %>%
+  #column_to_rownames(var = "Sample")
+  #column_to_rownames(MetaSRER, var = "Sample")
+ # rownames(MetaSRER) <- MetaSRER$Sample
+###Convert distance to a factor since it is being used as a metric to measure disturbance levels
+MetaSRER$Distance <- as.factor(MetaSRER$Distance)
+###OTU Table
+OTU2<-filtered_FullData[,c(1,13:350)]
+rownames(OTU2) <- OTU2$Sample
+###Filtering samples with low read counts  
+sumtable<-function(x){
+  if(is.numeric(x)){
+    sum(x) > 10
+  } else {
+    TRUE
+  }
+}
+CH2OTUfilter<-OTU2[, sapply(OTU2,  sumtable)]
+##nothing filtered
+
+OTU2$Sample <- NULL
+shannon<-diversity(OTU2)
+  #column_to_rownames(var="Sample")
+###Generate Distance matrix and NMDSplot
+dm.method <- 'bray'
+dm <- vegdist(OTU2, method=dm.method)
+otu.nmds <- metaMDS(dm,
+                    k = 2,
+                    maxit = 999,
+                    trymax = 500,
+                    wascores = TRUE)
+##Check model
+stressplot(otu.nmds)
+###NMDS all Pastures
+
 ```
 
 ## Including Plots
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r plot, echo=FALSE}
+plot(otu.nmds)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
