@@ -5,7 +5,7 @@ date: "2024-01-19"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 This document outlines the metagenomic studies utilized in chapter one of my thesis to analyze microfungi population in biological soil crust samples at the SRER
 
 
-```{r cars}
+```{r chunk, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(vegan)
 library(indicspecies)
@@ -32,15 +32,6 @@ filtered_FullData <- subset(FullSRERDataset, Richness != 0)
 MetaSRER<-filtered_FullData[,1:12]
 MetaSRER <- filtered_FullData[, 1:12]
 rownames(MetaSRER) <- MetaSRER$Sample
-#MetaSRER <- MetaSRER[, -which(names(MetaSRER) == "Sample")]
-
-#MetaSRER <- as.data.frame(MetaSRER)
-#MetaSRER <- MetaSRER %>%
-  #column_to_rownames(var = "Sample")
-#MetaSRER <- MetaSRER %>%
-  #column_to_rownames(var = "Sample")
-  #column_to_rownames(MetaSRER, var = "Sample")
- # rownames(MetaSRER) <- MetaSRER$Sample
 ###Convert distance to a factor since it is being used as a metric to measure disturbance levels
 MetaSRER$Distance <- as.factor(MetaSRER$Distance)
 ###OTU Table
@@ -74,12 +65,427 @@ stressplot(otu.nmds)
 
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r plot, echo=FALSE}
+``` {r chunk2, message=FALSE, warning=FALSE, echo= TRUE}
+###NMDS all Pastures
 plot(otu.nmds)
+
+nmds.scores <- as.data.frame(scores(otu.nmds, display = 'sites'))
+nmds.scores$site <- rownames(nmds.scores) 
+nmds.scores$Sample <- nmds.scores$site
+nmds.scores$site <- NULL
+nmds.scores <- left_join(nmds.scores, MetaSRER, by = 'Sample')
+###Graphing all colored by Distance
+nmds_plot <- ggplot(nmds.scores,
+                    aes(x = NMDS1,
+                        y = NMDS2)) +
+  geom_point(size=3, aes(color=Distance, shape=Pasture)) +
+  stat_ellipse(aes(color=Distance)) +
+  labs(x = "NMDS1", colour = "Distance", shape="Pasture", y = "NMDS2") 
+nmds_plot
+###Graphing all colored by pasture
+nmds_plot_PG <- ggplot(nmds.scores,
+                    aes(x = NMDS1,
+                        y = NMDS2)) +
+  geom_point(size=3, aes(color=Pasture, shape=Distance)) +
+  stat_ellipse(aes(color=Pasture)) +
+  labs(x = "NMDS1", colour = "Pasture", shape="Distance", y = "NMDS2") 
+nmds_plot_PG
+##Re-Running NMDS but individually for each pasture
+Meta5s<-subset(MetaSRER, Pasture == "5S")
+OTU5s<- rownames_to_column(OTU2, var = "Sample")
+OTU5sonly<-merge(Meta5s, OTU5s, by.x="Sample", all=FALSE)
+OTU5sonly<-OTU5sonly[,-c(2:12)] %>%
+column_to_rownames(var="Sample")
+###Distance matrix and stressplot
+dm.method <- 'bray'
+dm5s <- vegdist(OTU5sonly, method=dm.method)
+otu5s.nmds <- metaMDS(dm5s,
+                    k = 2,
+                    maxit = 999,
+                    trymax = 500,
+                    wascores = TRUE)
+stressplot(otu5s.nmds)
+otu5s.nmds
+nmds5s.scores <- as.data.frame(scores(otu5s.nmds, display = 'sites'))
+nmds5s.scores$site <- rownames(nmds5s.scores) 
+nmds5s.scores$Sample <- nmds5s.scores$site
+nmds5s.scores$site <- NULL
+nmds5s.scores <- left_join(nmds5s.scores, MetaSRER, by = 'Sample')
+nmds_plot5s <- ggplot(nmds5s.scores,
+                     aes(x = NMDS1,
+                         y = NMDS2)) +
+  geom_point(size=3, aes(color=Distance)) +
+  stat_ellipse(aes(color=Distance)) +
+  labs(x = "NMDS1", colour = "Distance", y = "NMDS2", title="Pasture 5s") 
+nmds_plot5s
+
+####Visualizing Pasture 5S richness
+ggplot(Meta5s, aes(y = Richness, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance") + 
+  ylab("Ln Richness") + theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))
+##Getting rid of dataset outliers based on richness values
+list_quantiles5s <- tapply(Meta5s$Richness, Meta5s$Distance, quantile)
+Q1s5s <- sapply(1:3, function(i) list_quantiles5s[[i]][2])
+Q3s5s <- sapply(1:3, function(i) list_quantiles5s[[i]][4])
+IQRs5s <- tapply(Meta5s$Richness, Meta5s$Distance, IQR)
+Lowers5s <- Q1s5s - 1.5*IQRs5s
+Uppers5s <- Q3s5s + 1.5*IQRs5s
+datas5s <- split(Meta5s, Meta5s$Distance)
+##Re-Visualizing Richness 5s no outliers
+data_no_outlier5s <- NULL
+for (i in 1:3){
+  out5s <- subset(datas5s[[i]], datas5s[[i]]$Richness > Lowers5s[i] & datas5s[[i]]$Richness < Uppers5s[i])
+  data_no_outlier5s <- rbind(data_no_outlier5s, out5s)
+}
+
+dim(data_no_outlier5s)
+###Graph it
+ggplot(data_no_outlier5s, aes(y = Richness, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance") + 
+  ylab("Ln Richness") + theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))
+###Re-Trying NMDS with no_outliers dataset
+##Get rid of outliers from OTU table
+different_rows5s <- anti_join(Meta5s, data_no_outlier5s, by = "Sample")
+print(rownames(different_rows5s))
+delete5s<-c("BSC5562_004", "DOW5562_031", "BSC5562_016", "BSC5562_018")
+otu5s_nooutliers<-OTU5sonly[!(rownames(OTU5sonly) %in% delete5s), ]
+
+dm.method <- 'bray'
+dmnoout5s <- vegdist(otu5s_nooutliers, method=dm.method)
+otunoout5s.nmds <- metaMDS(dmnoout5s,
+                      k = 2,
+                      maxit = 999,
+                      trymax = 500,
+                      wascores = TRUE)
+stressplot(otunoout5s.nmds)
+otunoout5s.nmds
+nmds5snoout.scores <- as.data.frame(scores(otunoout5s.nmds, display = 'sites'))
+nmds5snoout.scores$site <- rownames(nmds5snoout.scores) 
+nmds5snoout.scores$Sample <- nmds5snoout.scores$site
+nmds5snoout.scores$site <- NULL
+nmds5snoout.scores <- left_join(nmds5snoout.scores, MetaSRER, by = 'Sample')
+nmds_plot5snoout <- ggplot(nmds5snoout.scores,
+                      aes(x = NMDS1,
+                          y = NMDS2)) +
+  geom_point(size=3, aes(color=Distance)) +
+  stat_ellipse(aes(color=Distance)) +
+  labs(x = "NMDS1", colour = "Distance", y = "NMDS2", title="Pasture 5S") + theme(panel.grid.major = element_blank(), 
+                                                                                  panel.grid.minor = element_blank())
+nmds_plot5snoout
+##5s no outliers check statistics if significant differences by distance
+Meta5s_nooutliers<-Meta5s[!(rownames(Meta5s) %in% delete5s), ]
+adonis2(vegdist(otu5s_nooutliers, method='bray')~Distance, data=Meta5s_nooutliers, permutations = 9999)
+
+###Pasture 5N NMDS
+Meta5N<-subset(MetaSRER, Pasture == "5N")
+OTU5N<- rownames_to_column(OTU2, var = "Sample")
+OTU5Nonly<-merge(Meta5N, OTU5N, by.x="Sample", all=FALSE)
+OTU5Nonly<-OTU5Nonly[,-c(2:12)] %>%
+  column_to_rownames(var="Sample")
+dm.method <- 'bray'
+dm5N <- vegdist(OTU5Nonly, method=dm.method)
+otu5N.nmds <- metaMDS(dm5N,
+                      k = 2,
+                      maxit = 999,
+                      trymax = 500,
+                      wascores = TRUE)
+stressplot(otu5N.nmds)
+nmds5N.scores <- as.data.frame(scores(otu5N.nmds, display = 'sites'))
+nmds5N.scores$site <- rownames(nmds5N.scores) 
+nmds5N.scores$Sample <- nmds5N.scores$site
+nmds5N.scores$site <- NULL
+nmds5N.scores <- left_join(nmds5N.scores, MetaSRER, by = 'Sample')
+nmds_plot5N <- ggplot(nmds5N.scores,
+                      aes(x = NMDS1,
+                          y = NMDS2)) +
+  geom_point(size=3, aes(color=Distance)) +
+  stat_ellipse(aes(color=Distance)) +
+  labs(x = "NMDS1", colour = "Distance", y = "NMDS2", title="Pasture 5N") 
+nmds_plot5N
+###Richness 5n
+ggplot(Meta5N, aes(y = Richness, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance") + 
+  ylab("Ln Richness") + theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))
+##Attempt to get rid of outliers by identifying upper and lower IQR for 5N pasture 
+quartiles5N<- quantile(Meta5N$Richness, probs=c(.25, .75), na.rm= FALSE)
+IQR5N<- IQR(Meta5N$Richness)
+Lower5N<- quartiles5N[1]-1.5*IQR5N
+upper5N<- quartiles5N[2]+1.5*IQR5N
+Richness5Nnooutliers<- subset(Meta5N, Meta5N$Richness> Lower5N & Meta5N$Richness <upper5N)
+##Plotting with no outliers
+ggplot(Richness5Nnooutliers, aes(y = Richness, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance") + 
+  ylab("Ln Richness") + theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))
+###Try getting rid of outliers by richness and distance
+list_quantiles5n <- tapply(Meta5N$Richness, Meta5N$Distance, quantile)
+Q1s5N <- sapply(1:3, function(i) list_quantiles5n[[i]][2])
+Q3s5N <- sapply(1:3, function(i) list_quantiles5n[[i]][4])
+IQRs5ng <- tapply(Meta5N$Richness, Meta5N$Distance, IQR)
+Lowers5ng <- Q1s5N - 1.5*IQRs5ng
+Uppers5ng <- Q3s5N + 1.5*IQRs5ng
+datas5n <- split(Meta5N, Meta5N$Distance)
+
+data_no_outlier5n <- NULL
+for (i in 1:3){
+  out5n <- subset(datas5n[[i]], datas5n[[i]]$Richness > Lowers5ng[i] & datas5n[[i]]$Richness < Uppers5ng[i])
+  data_no_outlier5n <- rbind(data_no_outlier5n, out5n)
+}
+
+dim(data_no_outlier5n)
+###Graph it
+ggplot(data_no_outlier5n, aes(y = Richness, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance") + 
+  ylab("Ln Richness") + theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))
+##Trying the NMDS after removing outliers 5N
+different_rows5n <- anti_join(Meta5N, data_no_outlier5n, by = "Sample")
+print(rownames(different_rows5n))
+delete5n<-c("BSC5562_028", "BSC5562_031", "DOW5562_048")
+otu5n_nooutliers<-OTU5Nonly[!(rownames(OTU5Nonly) %in% delete5n), ]
+
+dm.method <- 'bray'
+dmnoout5n <- vegdist(otu5n_nooutliers, method=dm.method)
+otunoout5n.nmds <- metaMDS(dmnoout5n,
+                           k = 2,
+                           maxit = 999,
+                           trymax = 500,
+                           wascores = TRUE)
+stressplot(otunoout5n.nmds)
+otunoout5n.nmds
+nmds5nnoout.scores <- as.data.frame(scores(otunoout5n.nmds, display = 'sites'))
+nmds5nnoout.scores$site <- rownames(nmds5nnoout.scores) 
+nmds5nnoout.scores$Sample <- nmds5nnoout.scores$site
+nmds5nnoout.scores$site <- NULL
+nmds5nnoout.scores <- left_join(nmds5nnoout.scores, MetaSRER, by = 'Sample')
+nmds_plot5nnoout <- ggplot(nmds5nnoout.scores,
+                           aes(x = NMDS1,
+                               y = NMDS2)) +
+  geom_point(size=3, aes(color=Distance)) +
+  stat_ellipse(aes(color=Distance)) +
+  labs(x = "NMDS1", colour = "Distance", y = "NMDS2", title="Pasture 5N") + theme(panel.grid.major = element_blank(), 
+                                                                                  panel.grid.minor = element_blank())
+nmds_plot5nnoout
+
+
+###6B Only
+Meta6B<-subset(MetaSRER, Pasture == "6B")
+OTU6B<- rownames_to_column(OTU2, var = "Sample")
+OTU6Bonly<-merge(Meta6B, OTU6B, by.x="Sample", all=FALSE)
+OTU6Bonly<-OTU6Bonly[,-c(2:12)] %>%
+  column_to_rownames(var="Sample")
+dm.method <- 'bray'
+dm6B <- vegdist(OTU6Bonly, method=dm.method)
+otu6B.nmds <- metaMDS(dm6B,
+                      k = 2,
+                      maxit = 999,
+                      trymax = 500,
+                      wascores = TRUE)
+stressplot(otu6B.nmds)
+nmds6B.scores <- as.data.frame(scores(otu6B.nmds, display = 'sites'))
+nmds6B.scores$site <- rownames(nmds6B.scores) 
+nmds6B.scores$Sample <- nmds6B.scores$site
+nmds6B.scores$site <- NULL
+nmds6B.scores <- left_join(nmds6B.scores, MetaSRER, by = 'Sample')
+nmds_plot6B <- ggplot(nmds6B.scores,
+                      aes(x = NMDS1,
+                          y = NMDS2,)) +
+  geom_point(size=3, aes(color=Distance)) +
+  stat_ellipse(aes(color=Distance))+
+  labs(x = "NMDS1", colour = "Distance", y = "NMDS2", title="Pasture 6B") 
+nmds_plot6B
+#ordihull(nmds6B.scores,groups=Distance,draw="polygon",col="grey90",label=F)
+Most_Disturbance6B<- nmds.scores[nmds.scores$Distance == "0", ][chull(nmds6B.scores[nmds.scores$Distance == 
+                                                                                  "0", c("NMDS1", "NMDS2")]), ]  # hull values for grp A
+Middle_Disturbance6B<- nmds.scores[nmds6B.scores$Distance == "500", ][chull(nmds.scores[nmds.scores$Distance == 
+                                                                                      "500", c("NMDS1", "NMDS2")]), ]  
+Least_Disturbance6B<- nmds.scores[nmds6B.scores$Distance == "1000", ][chull(nmds.scores[nmds.scores$Distance == 
+                                                                                      "1000", c("NMDS1", "NMDS2")]), ]
+hull.data6B <- rbind(Most_Disturbance6B, Middle_Disturbance6B, Least_Disturbance6B)
+###Richness6B
+ggplot(Meta6B, aes(y = Richness, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance") + 
+  ylab("Ln Richness") + theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))
+##getting rid of outliers
+list_quantiles6b <- tapply(Meta6B$Richness, Meta6B$Distance, quantile)
+Q1s6b <- sapply(1:3, function(i) list_quantiles6b[[i]][2])
+Q3s6b <- sapply(1:3, function(i) list_quantiles6b[[i]][4])
+IQRs6b <- tapply(Meta6B$Richness, Meta6B$Distance, IQR)
+Lowers6b <- Q1s6b - 1.5*IQRs6b
+Uppers6b <- Q3s6b + 1.5*IQRs6b
+datas6b <- split(Meta6B, Meta6B$Distance)
+
+data_no_outlier6b <- NULL
+for (i in 1:3){
+  out6b <- subset(datas6b[[i]], datas6b[[i]]$Richness > Lowers6b[i] & datas6b[[i]]$Richness < Uppers6b[i])
+  data_no_outlier6b <- rbind(data_no_outlier6b, out6b)
+}
+
+dim(data_no_outlier6b)
+###Graph it
+ggplot(data_no_outlier6b, aes(y = Richness, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance") + 
+  ylab("Ln Richness") + theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))
+
+###NMDS for 6B
+different_rows6B <- anti_join(Meta6B, data_no_outlier6b, by = "Sample")
+print(rownames(different_rows6B))
+delete6b<-c("BSC5562_052", "BSC5562_064", "DOW5562_079", "DOW5562_085", "BSC5562_069", "DOW5562_087")
+otu6b_nooutliers<-OTU6Bonly[!(rownames(OTU6Bonly) %in% delete6b), ]
+
+dm.method <- 'bray'
+dmnoout6b <- vegdist(otu6b_nooutliers, method=dm.method)
+otunoout6b.nmds <- metaMDS(dmnoout6b,
+                           k = 2,
+                           maxit = 999,
+                           trymax = 500,
+                           wascores = TRUE)
+stressplot(otunoout6b.nmds)
+otunoout6b.nmds
+nmds6bnoout.scores <- as.data.frame(scores(otunoout6b.nmds, display = 'sites'))
+nmds6bnoout.scores$site <- rownames(nmds6bnoout.scores) 
+nmds6bnoout.scores$Sample <- nmds6bnoout.scores$site
+nmds6bnoout.scores$site <- NULL
+nmds6bnoout.scores <- left_join(nmds6bnoout.scores, MetaSRER, by = 'Sample')
+nmds_plot6bnoout <- ggplot(nmds6bnoout.scores,
+                           aes(x = NMDS1,
+                               y = NMDS2)) +
+  geom_point(size=3, aes(color=Distance)) +
+  stat_ellipse(aes(color=Distance)) +
+  labs(x = "NMDS1", colour = "Distance", y = "NMDS2", title="Pasture 6B") + theme(panel.grid.major = element_blank(), 
+                                                                                  panel.grid.minor = element_blank())
+nmds_plot6bnoout
+
+
+###NMDS all no outliers in one plot
+deleteall<-c("BSC5562_004", "DOW5562_031", "BSC5562_016", "BSC5562_018","BSC5562_028", "BSC5562_031", "DOW5562_048","BSC5562_052", "BSC5562_064", "DOW5562_079", "DOW5562_085", "BSC5562_069", "DOW5562_087")
+all_no_outliers<-OTU2[!(rownames(OTU2) %in% deleteall), ]
+####Meta no outliers
+
+Meta_no_outliers<-MetaSRER[!(rownames(MetaSRER) %in% deleteall), ]
+richnesspast<-ggplot(Meta_no_outliers, aes(y = Richness, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance in Meters") + 
+  ylab("Richness") + ggtitle(label="Species Richness by Distance and Pasture")+ theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))+facet_wrap(~Pasture)+theme(panel.grid.major = element_blank(), 
+                                                                                                             panel.grid.minor = element_blank())
+richnesspast
+dm.method <- 'bray'
+dm <- vegdist(all_no_outliers, method=dm.method)
+otunoout.nmds <- metaMDS(dm,
+                         k = 2,
+                         maxit = 999,
+                         trymax = 500,
+                         wascores = TRUE)
+otunoout.nmds
+
+nmdsnoout.scores <- as.data.frame(scores(otunoout.nmds, display = 'sites'))
+nmdsnoout.scores$site <- rownames(nmdsnoout.scores) 
+nmdsnoout.scores$Sample <- nmdsnoout.scores$site
+nmdsnoout.scores$site <- NULL
+nmdsnoout.scores <- left_join(nmdsnoout.scores, Meta_no_outliers, by = 'Sample')
+nmds_noout_all <- ggplot(nmdsnoout.scores,
+                         aes(x = NMDS1,
+                             y = NMDS2)) +
+  geom_point(size=3, aes(color=Distance, shape=Pasture)) +theme(panel.grid.major = element_blank(), 
+                                                                panel.grid.minor = element_blank()) +
+  stat_ellipse(aes(color=Distance)) +
+  labs(x = "NMDS1", colour = "Distance", y = "NMDS2", title="NMDS All Pastures") 
+
+
+dm.method <- 'bray'
+dm2 <- vegdist(all_no_outliers, method=dm.method)
+otu2.nmds <- metaMDS(dm2,
+                     k = 2,
+                     maxit = 999,
+                     trymax = 500,
+                     wascores = TRUE)
+stressplot(otu2.nmds)
+##Graph
+nmds_noout_all
+```
+```{r chunk3, message=TRUE}
+###Are there significant differences in composition by distance
+adonis2(vegdist(all_no_outliers, method="bray") ~ Distance, strata=Meta_no_outliers$Pasture, data=Meta_no_outliers, permutations=9999)
+###Repeating by trying to filter data set further
+##Fulldataset Significance
+RichnessandPastureanova <- adonis2(all_no_outliers ~ Distance + Pasture, data = Meta_no_outliers, permutations = 999)
+print(RichnessandPastureanova)
+```
+``` {r chunk4, message=TRUE, warning=FALSE, echo= TRUE}
+##Indic species
+##Add all no outliers to site Info
+##group by pasture and transect 
+###Full dataset
+spec_for_indic<-read.csv("All_no_outliers.ind.csv", header=T)
+#indspec_all <- multipatt(spec_for_indic, groups, 
+                   # control = how(nperm=999)) 
+#write.csv(Meta_no_outliers, "meta_No_outliers.csv")
+groups<-read.csv("Groupsforindicator.csv",header=T)
+write.csv(all_no_outliers, "All_no_outliers.csv")
+spec_for_indic<-read.csv("All_no_outliers.ind.csv", header=T)
+abund<- spec_for_indic[,3:ncol(spec_for_indic)]
+group<-spec_for_indic$Pasture.Distance
+indspec_all <- multipatt(abund, group, func = "IndVal.g",
+                         control = how(nperm=999)) 
+summary(indspec_all)
+indspec_all
+
+### By Pasture
+Ind.pst<-read.csv("All_no_outliers.csv", header = T)
+abund2<- Ind.pst[,3:ncol(spec_for_indic)]
+group2<-Ind.pst$Pasture
+indspec_past <- multipatt(abund2, group2, func = "IndVal.g", duleg = TRUE, 
+                         control = how(nperm=999)) 
+summary(indspec_past)
+###By Distance
+spec_for_indic<-read.csv("All_no_outliers.ind2.csv", header=T)
+abund2<- spec_for_indic[,3:ncol(spec_for_indic)]
+group2<-spec_for_indic$Distance
+indspec_all2 <- multipatt(abund2, group2, func = "IndVal.g",
+                         control = how(nperm=999)) 
+summary(indspec_all2)
+
+
+###Shannon_Diversity
+Shannon_div_nooutliers<-diversity(all_no_outliers, index="shannon")
+Shannon_div <- as.data.frame(scores(Shannon_div_nooutliers, display = 'sites'))
+Shannon_div$site <- rownames(Shannon_div) 
+Shannon_div$Sample <- Shannon_div$site
+Shannon_div$site <- NULL
+Meta_with_shannon <- left_join(Shannon_div, Meta_no_outliers, by = 'Sample')
+Shannondivplot<-ggplot(Meta_with_shannon, aes(y = Dim1, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance in Meters") + 
+  ylab("Shannon Diversity") + ggtitle(label="Shannon Diversity by Distance and Pasture")+ theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))+facet_wrap(~Pasture)+ theme(panel.grid.major = element_blank(),
+                                                                                                            panel.grid.minor = element_blank())
+Shannondivplot
+##Evenness plot
+data_evenness <- diversity(all_no_outliers) / log(specnumber(all_no_outliers)) 
+evenness <- as.data.frame(scores(data_evenness, display = 'sites'))
+evenness$site <- rownames(evenness) 
+evenness$Sample <- evenness$site
+evenness$site <- NULL
+Meta_with_even<- left_join(evenness, Meta_no_outliers, by = 'Sample')
+evennessplot<-ggplot(Meta_with_even, aes(y = Dim1, x = Distance, fill = Distance, group= Distance)) + geom_boxplot(outlier.shape = NA, alpha=0.8)+
+  geom_jitter(aes(color = Distance))+ 
+  xlab("Distance in Meters") + 
+  ylab("Evenness") + ggtitle(label="Evenness by Distance and Pasture")+ theme_bw()+
+  theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 90))+facet_wrap(~Pasture)
+evennessplot
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
